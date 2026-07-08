@@ -1,0 +1,122 @@
+.table-container {
+  background-color: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden; 
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-empty {
+  padding: 2.5rem;
+  text-align: center;
+  color: var(--gray-500);
+  background-color: white;
+  border: 1px dashed var(--gray-300);
+  border-radius: var(--border-radius-lg);
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.history-table th,
+.history-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.history-table th {
+  background-color: var(--gray-50);
+  color: var(--gray-600);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.history-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.history-table tbody tr:hover {
+  background-color: var(--primary-50);
+}
+
+.history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.col-date {
+  color: var(--gray-600);
+  white-space: nowrap;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background-color: var(--primary-100);
+  color: var(--primary-700);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+.col-doctor {
+  font-weight: 500;
+  color: var(--gray-900);
+  white-space: nowrap;
+}
+
+.col-products {
+  color: var(--gray-600);
+}
+
+.col-sentiment {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.sentiment-pos { background-color: var(--success); }
+.sentiment-neg { background-color: var(--error); }
+.sentiment-neu { background-color: var(--gray-400); }
+
+.notes-truncate {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--gray-600);
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.completed {
+  background-color: var(--success-light);
+  color: var(--success);
+}
+
+.status-badge.pending {
+  background-color: var(--warning-light);
+  color: var(--warning);
+}

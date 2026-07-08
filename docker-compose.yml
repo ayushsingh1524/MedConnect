@@ -1,0 +1,115 @@
+# ==============================================================================
+# MedConnect AI — Docker Compose (Production)
+# ==============================================================================
+#
+# USAGE:
+#   1. Copy backend/.env.example to backend/.env and set your GROQ_API_KEY.
+#   2. Run: docker compose up --build
+#   3. Frontend:  http://localhost:3000
+#      Backend:   http://localhost:8000
+#      Swagger:   http://localhost:8000/docs
+#      PostgreSQL: localhost:5432
+#
+#   To tear down (including volumes):
+#     docker compose down -v
+#
+# ==============================================================================
+
+services:
+  # ──────────────────────────────────────────────────────────────────────────
+  # PostgreSQL Database
+  # ──────────────────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: medconnect-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: medconnect
+      POSTGRES_PASSWORD: medconnect_secret
+      POSTGRES_DB: medconnect_crm
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medconnect -d medconnect_crm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - medconnect-network
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # FastAPI Backend
+  # ──────────────────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    container_name: medconnect-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override DATABASE_URL to point to the Compose PostgreSQL service.
+      # This takes precedence over whatever is in the .env file.
+      DATABASE_URL: postgresql+asyncpg://medconnect:medconnect_secret@db:5432/medconnect_crm
+      APP_ENV: production
+      DEBUG: "False"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Mount backend source for live-reload during development.
+      # Remove this volume in a true production deployment.
+      - ./backend:/app/backend
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - medconnect-network
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # React Frontend (Nginx)
+  # ──────────────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend
+    container_name: medconnect-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - medconnect-network
+
+# ==============================================================================
+# Persistent Volumes
+# ==============================================================================
+volumes:
+  postgres_data:
+    driver: local
+
+# ==============================================================================
+# Networking
+# ==============================================================================
+networks:
+  medconnect-network:
+    driver: bridge

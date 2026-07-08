@@ -1,0 +1,73 @@
+.analytics-card {
+  background-color: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.analytics-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.analytics-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--border-radius-md);
+  background-color: var(--primary-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.analytics-icon {
+  font-size: 1.5rem;
+}
+
+.analytics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-grow: 1;
+}
+
+.analytics-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.analytics-data {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.analytics-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.analytics-trend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.trend-up {
+  color: var(--success);
+}
+
+.trend-down {
+  color: var(--error);
+}

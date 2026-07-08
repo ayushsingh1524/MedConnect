@@ -1,0 +1,164 @@
+.recommendation-panel {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, rgba(255, 255, 255, 0) 100%), var(--surface);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.05);
+}
+
+.recommendation-panel.empty {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  border: 1px dashed rgba(99, 102, 241, 0.3);
+}
+
+.sparkle-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.recommendation-panel.empty p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.generate-btn {
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.generate-btn:hover {
+  background-color: #1D4ED8; /* darker primary */
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refresh-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: transform 0.3s, color 0.2s;
+}
+
+.refresh-btn:hover {
+  color: var(--primary);
+  transform: rotate(180deg);
+}
+
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.recommendation-item {
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.recommendation-item:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background-color: rgba(99, 102, 241, 0.02);
+}
+
+.rec-confidence {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: #8B5CF6; /* Purple */
+  background-color: rgba(139, 92, 246, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rec-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  padding-right: 80px; /* space for confidence badge */
+}
+
+.rec-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.rec-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.rec-action-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.rec-action-btn.primary {
+  background-color: rgba(29, 78, 216, 0.1);
+  color: var(--primary);
+}
+
+.rec-action-btn.primary:hover {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.rec-action-btn.secondary {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.rec-action-btn.secondary:hover {
+  background-color: var(--border);
+  color: var(--text-primary);
+}
