@@ -14,6 +14,7 @@ from app.tools.crm_tools import (
 from app.tools.search_tools import (
     search_interactions,
     ai_recommendation,
+    search_doctors,
 )
 
 # List of all tools available to the LangGraph agent
@@ -23,6 +24,7 @@ ALL_TOOLS = [
     schedule_follow_up,
     search_interactions,
     ai_recommendation,
+    search_doctors,
 ]
 
 __all__ = [
@@ -32,4 +34,5 @@ __all__ = [
     "schedule_follow_up",
     "search_interactions",
     "ai_recommendation",
+    "search_doctors",
 ]

@@ -12,7 +12,44 @@ from pydantic import BaseModel, Field
 
 from app.database import AsyncSessionLocal
 from app.services.interaction_service import get_interactions
-from app.services.hcp_service import get_doctor_by_id
+from app.services.hcp_service import get_doctor_by_id, get_all_doctors
+
+
+# ==================== Search Doctors ====================
+
+class SearchDoctorsInput(BaseModel):
+    """Input schema for searching doctors by name."""
+    name: str = Field(..., description="The doctor's name or partial name to search for.")
+
+
+@tool("search_doctors", args_schema=SearchDoctorsInput)
+async def search_doctors(name: str) -> str:
+    """
+    Search for doctors by name in the CRM database.
+    Use this FIRST whenever the user mentions a doctor by name, to get their UUID.
+    You MUST call this before log_interaction, schedule_follow_up, or ai_recommendation
+    if you only have the doctor's name and not their UUID.
+    """
+    try:
+        async with AsyncSessionLocal() as db:
+            doctors, total = await get_all_doctors(db, search=name, limit=5)
+
+        if not doctors:
+            return f"No doctors found matching '{name}'."
+
+        results = []
+        for doc in doctors:
+            results.append(
+                f"- ID: {doc.id} | Name: {doc.name} | Specialty: {doc.specialty} "
+                f"| Hospital: {doc.hospital} | City: {doc.city}"
+            )
+
+        return (
+            f"Found {total} doctor(s) matching '{name}':\n"
+            + "\n".join(results)
+        )
+    except Exception as e:
+        return f"Error searching doctors: {str(e)}"
 
 
 # ==================== Search Interactions ====================
