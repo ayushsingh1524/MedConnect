@@ -110,29 +110,60 @@
   border-bottom-left-radius: 4px;
 }
 
-.message-structured-data {
+.message-structured-data-card {
   margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.message-structured-data pre {
-  margin: 0;
-  font-size: 0.75rem;
+  padding: 12px;
   background-color: var(--background);
-  padding: 8px;
-  border-radius: 6px;
-  overflow-x: auto;
-  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.85rem;
 }
 
-.message-bubble.user .message-structured-data {
-  border-top-color: rgba(255, 255, 255, 0.2);
-}
-
-.message-bubble.user .message-structured-data pre {
+.message-bubble.user .message-structured-data-card {
   background-color: rgba(0, 0, 0, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.status-indicator {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-indicator.success {
+  color: #10B981;
+}
+
+.status-indicator.error {
+  color: #EF4444;
+}
+
+.code-badge {
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  border: 1px solid var(--border);
+}
+
+.data-action, .data-suggestion {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.message-bubble.user .data-action,
+.message-bubble.user .data-suggestion {
   color: rgba(255, 255, 255, 0.9);
+}
+
+.message-bubble.user .code-badge {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .typing .dot {

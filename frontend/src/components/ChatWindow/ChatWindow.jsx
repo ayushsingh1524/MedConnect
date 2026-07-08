@@ -47,9 +47,23 @@ const ChatWindow = ({ messages, isTyping, onSendMessage }) => {
                 {msg.content}
               </div>
               {msg.data && (
-                <div className="message-structured-data">
-                  {/* Render structured tool data if available */}
-                  <pre>{JSON.stringify(msg.data, null, 2)}</pre>
+                <div className="message-structured-data-card">
+                  <div className={`status-indicator ${msg.data.status}`}>
+                    {msg.data.status === 'success' ? '✅ Action Successful' : '⚠️ Action Needed'}
+                  </div>
+                  <div className="data-action">
+                    <strong>Action:</strong> <span className="code-badge">{msg.data.action}</span>
+                  </div>
+                  {msg.data.message && msg.data.message !== "Interaction logged successfully" && (
+                    <div className="data-suggestion">
+                      {msg.data.message}
+                    </div>
+                  )}
+                  {msg.data.follow_up_suggestion && (
+                    <div className="data-suggestion">
+                      <strong>Suggestion:</strong> {msg.data.follow_up_suggestion}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
