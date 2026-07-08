@@ -61,6 +61,32 @@ async def get_doctor(
     return doctor
 
 
+@router.get("/{doctor_id}/profile")
+async def get_doctor_profile(
+    doctor_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Retrieve a specific doctor along with their interactions and recommendations."""
+    doctor = await get_doctor_by_id(db, doctor_id)
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+        
+    from app.services.interaction_service import get_interactions
+    interactions, _ = await get_interactions(db, doctor_id=doctor_id, limit=20)
+    
+    from app.models.recommendation import AIRecommendation
+    from sqlalchemy import select
+    result = await db.execute(select(AIRecommendation).where(AIRecommendation.doctor_id == doctor_id).order_by(AIRecommendation.created_at.desc()))
+    recommendations = result.scalars().all()
+    
+    return {
+        "doctor": doctor,
+        "interactions": interactions,
+        "recommendations": recommendations
+    }
+
+
 @router.patch("/{doctor_id}", response_model=DoctorResponse)
 async def update_existing_doctor(
     doctor_id: uuid.UUID,

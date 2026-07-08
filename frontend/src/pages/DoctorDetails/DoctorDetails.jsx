@@ -6,48 +6,10 @@ import InteractionTimeline from '../../components/InteractionTimeline/Interactio
 import RecommendationPanel from '../../components/RecommendationPanel/RecommendationPanel';
 import './DoctorDetails.css';
 
-// Mock data
-const MOCK_DOCTOR = {
-  id: '1',
-  name: 'Sarah Jenkins',
-  specialty: 'Cardiology',
-  hospital: 'Mercy General',
-  city: 'San Francisco',
-  email: 's.jenkins@mercy.org',
-  phone: '(555) 123-4567',
-  status: 'High Priority'
-};
-
-const MOCK_RECOMMENDATIONS = [
-  {
-    id: '1',
-    title: 'Discuss CardioMax Trial Data',
-    description: 'Dr. Jenkins has shown high interest in recent vascular trials. Present the Q3 CardioMax outcomes to address her previous concerns regarding efficacy in elderly patients.',
-    metadata_data: { confidence_score: 0.92 }
-  },
-  {
-    id: '2',
-    title: 'Invite to Upcoming Symposium',
-    description: 'There is a regional cardiology symposium next month. She attended last year and provided positive feedback.',
-    metadata_data: { confidence_score: 0.78 }
-  }
-];
-
-const MOCK_TIMELINE = [
-  {
-    id: '1',
-    interaction_type: 'in-person',
-    interaction_date: new Date().toISOString(),
-    sentiment: 'positive',
-    products_discussed: ['CardioMax'],
-    ai_summary: 'Great lunch meeting. She is very interested in the new efficacy data and asked for sample packs.'
-  }
-];
-
 const DoctorDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { currentHCP: doctor, loading, error } = useSelector((state) => state.hcps);
+  const { currentHCP: profile, loading, error } = useSelector((state) => state.hcps);
 
   useEffect(() => {
     dispatch(fetchHCPById(id));
@@ -55,7 +17,11 @@ const DoctorDetails = () => {
   }, [dispatch, id]);
 
   if (loading) return <div className="doctor-details-page"><div className="skeleton" style={{height: '200px'}}></div></div>;
-  if (error || !doctor) return <div className="doctor-details-page">Error loading HCP details.</div>;
+  if (error || !profile) return <div className="doctor-details-page">Error loading HCP details.</div>;
+
+  const doctor = profile.doctor;
+  const interactions = profile.interactions || [];
+  const recommendations = profile.recommendations || [];
 
   return (
     <div className="doctor-details-page">
@@ -71,7 +37,7 @@ const DoctorDetails = () => {
         <div className="profile-info-main">
           <div className="profile-title-row">
             <h1 className="profile-name">Dr. {doctor.name}</h1>
-            <span className="priority-tag">{doctor.status}</span>
+            <span className="priority-tag">High Priority</span>
           </div>
           <p className="profile-specialty">{doctor.specialty}</p>
           
@@ -89,8 +55,7 @@ const DoctorDetails = () => {
         </div>
         
         <div className="profile-actions">
-          <button className="primary-btn">Log Interaction</button>
-          <button className="secondary-btn">Schedule Task</button>
+          <Link to="/interactions" className="primary-btn" style={{textDecoration: 'none'}}>Log Interaction</Link>
         </div>
       </div>
 
@@ -100,26 +65,34 @@ const DoctorDetails = () => {
             <h2>Interaction History</h2>
           </div>
           <div className="card-container timeline-container-large">
-            <InteractionTimeline interactions={MOCK_TIMELINE} />
+            {interactions.length > 0 ? (
+              <InteractionTimeline interactions={interactions} />
+            ) : (
+              <div className="empty-state">
+                <span className="empty-icon">🗓️</span>
+                <h3>No interactions</h3>
+                <p>Log a new interaction with Dr. {doctor.name} to see their timeline.</p>
+              </div>
+            )}
           </div>
         </div>
         
         <div className="details-side-col">
-          <RecommendationPanel recommendations={MOCK_RECOMMENDATIONS} />
+          <RecommendationPanel recommendations={recommendations} />
           
           <div className="quick-stats-card">
             <h3>HCP Stats</h3>
             <div className="stat-row">
               <span>YTD Visits</span>
-              <strong>12</strong>
+              <strong>{interactions.length}</strong>
             </div>
             <div className="stat-row">
               <span>Preferred Channel</span>
               <strong>In-person</strong>
             </div>
             <div className="stat-row">
-              <span>Average Sentiment</span>
-              <strong>Positive</strong>
+              <span>Status</span>
+              <strong>Active</strong>
             </div>
           </div>
         </div>

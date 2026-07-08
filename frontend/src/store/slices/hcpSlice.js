@@ -8,8 +8,8 @@ export const fetchHCPs = createAsyncThunk('hcps/fetchAll', async () => {
 });
 
 export const fetchHCPById = createAsyncThunk('hcps/fetchById', async (id) => {
-  const response = await fetch(`/api/v1/hcps/${id}`);
-  if (!response.ok) throw new Error('Failed to fetch HCP details');
+  const response = await fetch(`/api/v1/hcps/${id}/profile`);
+  if (!response.ok) throw new Error('Failed to fetch HCP profile');
   return response.json();
 });
 
@@ -41,14 +41,14 @@ const hcpSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
-      // Fetch Single
+      // Fetch Single (Profile)
       .addCase(fetchHCPById.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchHCPById.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentHCP = action.payload;
+        state.currentHCP = action.payload; // Contains doctor, interactions, recommendations
       })
       .addCase(fetchHCPById.rejected, (state, action) => {
         state.loading = false;
