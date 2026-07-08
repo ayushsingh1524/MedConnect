@@ -21,7 +21,7 @@ settings = get_settings()
 # gemma2-9b-it provides excellent reasoning and tool-calling capabilities
 try:
     llm = ChatGroq(
-        model="gemma2-9b-it",
+        model="llama-3.1-8b-instant",
         temperature=0,  # Zero temperature for deterministic reasoning
         api_key=settings.GROQ_API_KEY or "dummy_key",
     )
