@@ -7,7 +7,7 @@ to stream the reasoning process, tool calls, and final structured response.
 import json
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -27,7 +27,7 @@ async def chat_stream(
 ):
     """
     Stream the LangGraph agent's execution process to the frontend using SSE.
-    Streams tokens, tool executions, and the final structured JSON.
+    Uses astream with 'updates' mode for reliable per-node output streaming.
     """
     
     async def generate_response():
@@ -44,29 +44,40 @@ async def chat_stream(
         }
 
         try:
-            # astream_events yields every discrete step the graph takes (v2 API)
-            async for event in medconnect_graph.astream_events(state, version="v2"):
-                kind = event["event"]
-                
-                # 1. Stream raw LLM text tokens (for typing effect)
-                if kind == "on_chat_model_stream":
-                    chunk = event["data"]["chunk"]
-                    if chunk.content:
-                        yield f"data: {json.dumps({'event': 'token', 'data': chunk.content})}\n\n"
-                        
-                # 2. Notify UI when a tool starts executing
-                elif kind == "on_tool_start":
-                    yield f"data: {json.dumps({'event': 'tool_start', 'data': {'name': event['name'], 'args': event['data'].get('input')}})}\n\n"
-                    
-                # 3. Notify UI when a tool finishes and return the result
-                elif kind == "on_tool_end":
-                    yield f"data: {json.dumps({'event': 'tool_end', 'data': {'name': event['name'], 'result': str(event['data'].get('output'))}})}\n\n"
-                
-                # 4. Stream the final structured JSON from the response_formatter_node
-                elif kind == "on_chain_end" and event["name"] == "response_formatter":
-                    final_state = event["data"].get("output", {})
-                    if "final_response" in final_state:
-                        yield f"data: {json.dumps({'event': 'final_json', 'data': final_state['final_response']})}\n\n"
+            # astream with stream_mode="updates" yields per-node outputs reliably
+            async for node_output in medconnect_graph.astream(state, stream_mode="updates"):
+                for node_name, output in node_output.items():
+
+                    if node_name == "reasoning":
+                        # Check if the AI decided to call tools or respond directly
+                        msgs = output.get("messages", [])
+                        for msg in msgs:
+                            if isinstance(msg, AIMessage):
+                                if getattr(msg, "tool_calls", None):
+                                    # Notify UI about each tool being called
+                                    for tc in msg.tool_calls:
+                                        yield f"data: {json.dumps({'event': 'tool_start', 'data': {'name': tc['name']}})}\n\n"
+                                elif msg.content:
+                                    # Stream the AI's direct text response
+                                    yield f"data: {json.dumps({'event': 'token', 'data': msg.content})}\n\n"
+
+                    elif node_name == "tools":
+                        # Tool execution finished
+                        msgs = output.get("messages", [])
+                        for msg in msgs:
+                            if isinstance(msg, ToolMessage):
+                                yield f"data: {json.dumps({'event': 'tool_end', 'data': {'name': msg.name, 'result': str(msg.content)[:200]}})}\n\n"
+
+                    elif node_name == "response_formatter":
+                        # The final structured response
+                        final = output.get("final_response")
+                        if final:
+                            # Send the human-readable message as a token
+                            message = final.get("message", "")
+                            if message:
+                                yield f"data: {json.dumps({'event': 'token', 'data': message})}\n\n"
+                            # Send the full structured JSON for the UI
+                            yield f"data: {json.dumps({'event': 'final_json', 'data': final})}\n\n"
 
             # Signal the end of the stream
             yield f"data: {json.dumps({'event': 'end'})}\n\n"

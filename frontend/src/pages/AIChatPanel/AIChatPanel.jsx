@@ -11,6 +11,33 @@ const AIChatPanel = () => {
     setMessages(prev => [...prev, userMsg]);
     setIsTyping(true);
 
+    // We'll build the assistant message progressively
+    let systemParts = [];   // Tool call system messages
+    let responseParts = []; // AI text content
+    let structuredData = null;
+
+    const updateAssistantMessage = () => {
+      const content = [
+        ...systemParts,
+        ...responseParts
+      ].join('');
+
+      setMessages(prev => {
+        const newMessages = [...prev];
+        // Find or create the assistant message
+        const lastIdx = newMessages.length - 1;
+        if (lastIdx >= 0 && newMessages[lastIdx].role === 'assistant') {
+          newMessages[lastIdx] = { role: 'assistant', content, data: structuredData };
+        } else {
+          newMessages.push({ role: 'assistant', content, data: structuredData });
+        }
+        return newMessages;
+      });
+    };
+
+    // Add an empty assistant message
+    setMessages(prev => [...prev, { role: 'assistant', content: '', data: null }]);
+
     try {
       const response = await fetch('/api/v1/chat/stream', {
         method: 'POST',
@@ -22,40 +49,48 @@ const AIChatPanel = () => {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let assistantMsg = { role: 'assistant', content: '', data: null };
-
-      setMessages(prev => [...prev, assistantMsg]);
+      let buffer = '';
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n\n');
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        // Keep the last potentially incomplete chunk in the buffer
+        buffer = lines.pop() || '';
         
         for (const line of lines) {
           if (line.startsWith('data: ')) {
-            const dataStr = line.replace('data: ', '');
+            const dataStr = line.slice(6); // More reliable than replace
             try {
               const eventObj = JSON.parse(dataStr);
+
               if (eventObj.event === 'token') {
-                assistantMsg.content += eventObj.data;
+                responseParts.push(eventObj.data);
+                updateAssistantMessage();
+
               } else if (eventObj.event === 'tool_start') {
-                assistantMsg.content += `\n[System: Calling tool ${eventObj.data.name}...]\n`;
+                systemParts.push(`\n🔧 Calling ${eventObj.data.name}...\n`);
+                updateAssistantMessage();
+
               } else if (eventObj.event === 'tool_end') {
-                assistantMsg.content += `[System: Tool finished]\n`;
+                systemParts.push(`✅ ${eventObj.data.name} completed.\n\n`);
+                // Clear system parts so the final response appears clean
+                // but keep them visible briefly
+                updateAssistantMessage();
+
               } else if (eventObj.event === 'final_json') {
-                assistantMsg.data = eventObj.data;
+                structuredData = eventObj.data;
+                updateAssistantMessage();
+
+              } else if (eventObj.event === 'error') {
+                responseParts.push(`\n⚠️ Error: ${eventObj.data}`);
+                updateAssistantMessage();
+
               } else if (eventObj.event === 'end') {
-                break;
+                // Stream complete
               }
-              
-              // Update state with new message content
-              setMessages(prev => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1] = { ...assistantMsg };
-                return newMessages;
-              });
             } catch (e) {
               console.error('Error parsing SSE:', e, dataStr);
             }
