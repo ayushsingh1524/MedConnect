@@ -18,10 +18,10 @@ from app.prompts import (
 settings = get_settings()
 
 # Initialize the Groq model
-# gemma2-9b-it provides excellent reasoning and tool-calling capabilities
+# llama-3.3-70b-versatile provides excellent reasoning and tool-calling capabilities
 try:
     llm = ChatGroq(
-        model="llama-3.1-8b-instant",
+        model="llama-3.3-70b-versatile",
         temperature=0,  # Zero temperature for deterministic reasoning
         api_key=settings.GROQ_API_KEY or "dummy_key",
     )
