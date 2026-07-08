@@ -38,14 +38,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
           Interactions
         </NavLink>
         
-        <NavLink 
-          to="/follow-ups" 
-          onClick={closeSidebar}
-          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-        >
-          <span className="nav-icon">✅</span>
-          Follow-ups
-        </NavLink>
+
 
         <NavLink 
           to="/chat" 
