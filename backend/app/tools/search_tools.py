@@ -18,24 +18,32 @@ from app.services.hcp_service import get_doctor_by_id, get_all_doctors
 # ==================== Search Doctors ====================
 
 class SearchDoctorsInput(BaseModel):
-    """Input schema for searching doctors by name."""
-    name: str = Field(..., description="The doctor's name or partial name to search for.")
+    """Input schema for searching doctors by name and/or specialty."""
+    name: Optional[str] = Field(None, description="The doctor's name or partial name to search for.")
+    specialty: Optional[str] = Field(None, description="The medical specialty to filter by (e.g. Cardiology, Neurology, Oncology).")
 
 
 @tool("search_doctors", args_schema=SearchDoctorsInput)
-async def search_doctors(name: str) -> str:
+async def search_doctors(name: Optional[str] = None, specialty: Optional[str] = None) -> str:
     """
-    Search for doctors by name in the CRM database.
-    Use this FIRST whenever the user mentions a doctor by name, to get their UUID.
+    Search for doctors by name and/or specialty in the CRM database.
+    Use this FIRST whenever the user mentions a doctor by name or specialty, to get their UUID.
     You MUST call this before log_interaction, schedule_follow_up, or ai_recommendation
     if you only have the doctor's name and not their UUID.
     """
     try:
         async with AsyncSessionLocal() as db:
-            doctors, total = await get_all_doctors(db, search=name, limit=5)
+            doctors, total = await get_all_doctors(
+                db, search=name, specialty=specialty, limit=10
+            )
 
         if not doctors:
-            return f"No doctors found matching '{name}'."
+            search_desc = []
+            if name:
+                search_desc.append(f"name '{name}'")
+            if specialty:
+                search_desc.append(f"specialty '{specialty}'")
+            return f"No doctors found matching {' and '.join(search_desc) or 'the criteria'}."
 
         results = []
         for doc in doctors:
@@ -45,7 +53,7 @@ async def search_doctors(name: str) -> str:
             )
 
         return (
-            f"Found {total} doctor(s) matching '{name}':\n"
+            f"Found {total} doctor(s):\n"
             + "\n".join(results)
         )
     except Exception as e:

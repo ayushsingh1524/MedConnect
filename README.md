@@ -45,7 +45,7 @@ graph TD
 ## 📂 Folder Structure
 
 ```text
-avion-assignment/
+Aivoa-assignment/
 ├── backend/
 │   ├── app/
 │   │   ├── api/           # FastAPI routers (v1)
