@@ -43,9 +43,11 @@ const ChatWindow = ({ messages, isTyping, onSendMessage }) => {
         ) : (
           messages.map((msg, index) => (
             <div key={index} className={`message-bubble ${msg.role}`}>
-              <div className="message-content">
-                {msg.content}
-              </div>
+              {!msg.data && (
+                <div className="message-content">
+                  {msg.content}
+                </div>
+              )}
               {msg.data && (
                 <div className="message-structured-data-card">
                   <div className={`status-indicator ${msg.data.status}`}>

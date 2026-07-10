@@ -4,8 +4,8 @@ Pydantic schemas for Interaction, Follow-up, and AI Recommendation management.
 
 import uuid
 from typing import Optional, Literal
-from datetime import date, datetime
-from pydantic import BaseModel, Field
+from datetime import date, datetime, timezone
+from pydantic import BaseModel, Field, field_validator
 
 
 # ==================== Interaction Schemas ====================
@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 class InteractionCreate(BaseModel):
     """Schema for logging a new interaction (used by both REST form and AI agent)."""
     doctor_id: uuid.UUID
-    interaction_date: date
+    interaction_date: datetime
     interaction_type: Literal["in-person", "phone", "email", "video", "conference"]
     raw_notes: Optional[str] = None
     ai_summary: Optional[str] = None
@@ -25,7 +25,7 @@ class InteractionCreate(BaseModel):
 
 class InteractionUpdate(BaseModel):
     """Schema for editing an existing interaction. All fields optional."""
-    interaction_date: Optional[date] = None
+    interaction_date: Optional[datetime] = None
     interaction_type: Optional[str] = None
     raw_notes: Optional[str] = None
     ai_summary: Optional[str] = None
@@ -39,7 +39,8 @@ class InteractionResponse(BaseModel):
     """Schema returned when querying interaction data."""
     id: uuid.UUID
     doctor_id: uuid.UUID
-    interaction_date: date
+    doctor_name: Optional[str] = None
+    interaction_date: datetime
     interaction_type: str
     raw_notes: Optional[str] = None
     ai_summary: Optional[str] = None
@@ -49,6 +50,13 @@ class InteractionResponse(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+    @field_validator("interaction_date", "created_at", "updated_at", mode="after")
+    @classmethod
+    def set_timezone(cls, v: datetime):
+        if v and v.tzinfo is None:
+            return v.replace(tzinfo=timezone.utc)
+        return v
 
     model_config = {"from_attributes": True}
 
@@ -89,6 +97,13 @@ class FollowUpResponse(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+    @field_validator("created_at", "updated_at", mode="after")
+    @classmethod
+    def set_timezone(cls, v: datetime):
+        if v and v.tzinfo is None:
+            return v.replace(tzinfo=timezone.utc)
+        return v
 
     model_config = {"from_attributes": True}
 

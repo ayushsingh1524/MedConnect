@@ -131,3 +131,15 @@
     grid-template-columns: 1fr;
   }
 }
+
+.chat-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-section .chat-window {
+  height: 100%;
+  max-width: 100%;
+}
+

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchHCPs } from '../../store/slices/hcpSlice';
 import DoctorCard from '../../components/DoctorCard/DoctorCard';
+import AddHCPModal from '../../components/AddHCPModal/AddHCPModal';
+import { useToast } from '../../components/Toast/ToastContext';
 import './DoctorList.css';
 
 
@@ -13,6 +15,8 @@ const DoctorList = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSpecialty, setActiveSpecialty] = useState('All');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     dispatch(fetchHCPs());
@@ -29,6 +33,27 @@ const DoctorList = () => {
   });
   }, [doctors, searchTerm, activeSpecialty]);
 
+  const handleAddDoctor = async (formData) => {
+    try {
+      const res = await fetch('/api/v1/hcps/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (res.ok) {
+        dispatch(fetchHCPs());
+        setIsModalOpen(false);
+        showToast('HCP added successfully!', 'success');
+      } else {
+        const errData = await res.json();
+        showToast(errData.detail || 'Failed to add HCP', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Network error while adding HCP', 'error');
+    }
+  };
+
   return (
     <div className="doctor-list-page">
       <div className="page-header">
@@ -36,7 +61,7 @@ const DoctorList = () => {
           <h1 className="page-title">HCP Directory</h1>
           <p className="page-subtitle">Manage your territory's healthcare professionals.</p>
         </div>
-        <button className="primary-btn">
+        <button className="primary-btn" onClick={() => setIsModalOpen(true)}>
           <span className="icon">+</span> Add HCP
         </button>
       </div>
@@ -96,6 +121,12 @@ const DoctorList = () => {
           </div>
         )}
       </div>
+
+      <AddHCPModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onAdd={handleAddDoctor} 
+      />
     </div>
   );
 };

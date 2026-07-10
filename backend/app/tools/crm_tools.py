@@ -44,6 +44,15 @@ class LogInteractionInput(BaseModel):
     follow_up_date: Optional[str] = Field(
         None, description="If a follow-up is needed, the date in YYYY-MM-DD format."
     )
+    outcomes: Optional[str] = Field(
+        None, description="ALWAYS FILL THIS. Key outcomes, agreements, or decisions from the interaction. Example: 'Doctor requested more efficacy data' or 'Agreed to trial the new medication'."
+    )
+    follow_up_actions: Optional[str] = Field(
+        None, description="ALWAYS FILL THIS. Required follow-up actions, next steps, or reminders. Example: 'Schedule follow-up next Wednesday to provide efficacy data' or 'Send clinical trial results by email'."
+    )
+    dry_run: bool = Field(
+        False, description="If True, only extracts details without saving to database. Use this when the user wants to populate a form manually."
+    )
 
 
 @tool("log_interaction", args_schema=LogInteractionInput)
@@ -55,21 +64,42 @@ async def log_interaction(
     products_discussed: list[str] = [],
     sentiment: str = "neutral",
     follow_up_date: Optional[str] = None,
+    outcomes: Optional[str] = None,
+    follow_up_actions: Optional[str] = None,
+    dry_run: bool = False,
 ) -> str:
     """
     Log a new interaction with a Healthcare Professional (HCP) into the CRM.
     Use this tool when the user describes a visit, call, email, or meeting with a doctor.
-    Always extract the date, type, products, and sentiment from the user's description.
+    You MUST extract and provide ALL fields: date, type, products, sentiment, raw_notes, outcomes, and follow_up_actions.
+    For outcomes, summarize any agreements, decisions, or requests made during the meeting.
+    For follow_up_actions, list any next steps, callbacks, or reminders mentioned.
     """
+    if dry_run:
+        return (
+            f"Extracted interaction details for doctor {doctor_id} "
+            f"on {interaction_date} ({interaction_type}). "
+            f"Products: {', '.join(products_discussed) if products_discussed else 'None'}. "
+            f"Sentiment: {sentiment}. Outcomes: {outcomes}. Follow-up Actions: {follow_up_actions}. (Draft only, not saved)."
+        )
     try:
-        dt = datetime.datetime.strptime(interaction_date, "%Y-%m-%d").date()
+        # Parse the date and combine with current time since AI usually just gives a date
+        dt_date = datetime.datetime.strptime(interaction_date, "%Y-%m-%d").date()
+        dt = datetime.datetime.combine(dt_date, datetime.datetime.now().time())
         f_dt = datetime.datetime.strptime(follow_up_date, "%Y-%m-%d").date() if follow_up_date else None
         
+        # Append outcomes and follow-up actions to raw_notes if they exist
+        combined_notes = raw_notes
+        if outcomes:
+            combined_notes += f"\n\nOutcomes: {outcomes}"
+        if follow_up_actions:
+            combined_notes += f"\n\nFollow-up Actions: {follow_up_actions}"
+            
         interaction_data = InteractionCreate(
             doctor_id=uuid.UUID(doctor_id),
             interaction_type=interaction_type,
             interaction_date=dt,
-            raw_notes=raw_notes,
+            raw_notes=combined_notes,
             products_discussed=products_discussed,
             sentiment=sentiment,
             follow_up_date=f_dt

@@ -56,7 +56,7 @@ async def chat_stream(
                                 if getattr(msg, "tool_calls", None):
                                     # Notify UI about each tool being called
                                     for tc in msg.tool_calls:
-                                        yield f"data: {json.dumps({'event': 'tool_start', 'data': {'name': tc['name']}})}\n\n"
+                                        yield f"data: {json.dumps({'event': 'tool_start', 'data': {'name': tc['name'], 'args': tc['args']}})}\n\n"
                                 elif msg.content:
                                     # Stream the AI's direct text response
                                     yield f"data: {json.dumps({'event': 'token', 'data': msg.content})}\n\n"

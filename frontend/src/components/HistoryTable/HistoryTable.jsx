@@ -32,13 +32,18 @@ const HistoryTable = ({ interactions }) => {
           {interactions.map((interaction, index) => (
             <tr key={interaction.id || index}>
               <td className="col-date">
-                {new Date(interaction.interaction_date).toLocaleDateString('en-US')}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span>{new Date(interaction.interaction_date).toLocaleDateString('en-US')}</span>
+                  <span style={{ fontSize: '0.85em', color: 'var(--gray-500)', marginTop: '2px' }}>
+                    {new Date(interaction.interaction_date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
               </td>
               <td className="col-type">
                 <span className="type-badge">{interaction.interaction_type}</span>
               </td>
               <td className="col-doctor">
-                Dr. {interaction.doctor_name || 'Unknown'}
+                {interaction.doctor_name || 'Unknown'}
               </td>
               <td className="col-products">
                 {interaction.products_discussed && interaction.products_discussed.length > 0

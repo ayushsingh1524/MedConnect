@@ -7,6 +7,7 @@ import uuid
 from typing import Optional
 from datetime import date
 from sqlalchemy import select, func, or_
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.interaction import Interaction
 from app.models.followup import FollowUp
@@ -29,7 +30,13 @@ async def create_interaction(db: AsyncSession, data: InteractionCreate) -> Inter
     db.add(interaction)
     await db.flush()
     await db.refresh(interaction)
-    return interaction
+    # Eagerly load the doctor relationship so doctor_name property works
+    result = await db.execute(
+        select(Interaction)
+        .options(selectinload(Interaction.doctor))
+        .where(Interaction.id == interaction.id)
+    )
+    return result.scalar_one()
 
 
 async def get_interaction_by_id(
@@ -55,7 +62,7 @@ async def get_interactions(
     Retrieve a paginated list of interactions with optional filtering.
     Returns a tuple of (interactions, total_count).
     """
-    query = select(Interaction)
+    query = select(Interaction).options(selectinload(Interaction.doctor))
     count_query = select(func.count(Interaction.id))
 
     # Apply filters

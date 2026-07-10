@@ -1,28 +1,54 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import './Navbar.css';
 
-const Navbar = ({ toggleSidebar }) => {
+const Navbar = () => {
   return (
-    <header className="navbar">
-      <div className="navbar-search">
-        <button 
-          className="hamburger-btn" 
-          onClick={toggleSidebar}
-          aria-label="Toggle menu"
+    <header className="navbar glass-nav">
+      <div className="navbar-brand">
+        <h1 className="brand-title">MedConnect</h1>
+      </div>
+      
+      <nav className="navbar-nav">
+        <NavLink 
+          to="/" 
+          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
         >
-          ☰
-        </button>
+          Dashboard
+        </NavLink>
+        
+        <NavLink 
+          to="/hcps" 
+          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+        >
+          HCP Directory
+        </NavLink>
+        
+        <NavLink 
+          to="/interactions" 
+          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+        >
+          Interactions
+        </NavLink>
+
+        <NavLink 
+          to="/chat" 
+          className={({ isActive }) => (isActive ? 'nav-item ai-assistant active' : 'nav-item ai-assistant')}
+        >
+          ✨ AI Assistant
+        </NavLink>
+      </nav>
+
+      <div className="navbar-actions">
         <div className="search-input-wrapper">
           <span className="search-icon">🔍</span>
           <input 
             type="text" 
-            placeholder="Search doctors, interactions..." 
+            placeholder="Search..." 
             className="search-input"
           />
         </div>
-      </div>
-      
-      <div className="navbar-actions">
+        
         <button className="icon-btn notification-btn">
           <span className="icon">🔔</span>
           <span className="badge">3</span>
@@ -30,10 +56,6 @@ const Navbar = ({ toggleSidebar }) => {
         
         <div className="user-profile">
           <div className="avatar">SR</div>
-          <div className="user-info">
-            <span className="user-name">Sarah Rep</span>
-            <span className="user-role">Field Sales Manager</span>
-          </div>
         </div>
       </div>
     </header>

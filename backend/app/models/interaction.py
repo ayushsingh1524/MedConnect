@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional, List
-from datetime import date
-from sqlalchemy import String, Text, ForeignKey, Date, JSON
+from datetime import date, datetime
+from sqlalchemy import String, Text, ForeignKey, Date, DateTime, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base, UUIDMixin, TimestampMixin
 
@@ -19,7 +19,7 @@ class Interaction(Base, UUIDMixin, TimestampMixin):
     )
 
     # Core Interaction Data
-    interaction_date: Mapped[date] = mapped_column(Date, index=True, nullable=False)
+    interaction_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, nullable=False)
     interaction_type: Mapped[str] = mapped_column(String(50), nullable=False) # e.g., 'in-person', 'email', 'phone'
     status: Mapped[str] = mapped_column(String(50), default="completed", nullable=False)
     
@@ -38,3 +38,7 @@ class Interaction(Base, UUIDMixin, TimestampMixin):
         "Doctor", 
         back_populates="interactions"
     )
+
+    @property
+    def doctor_name(self) -> Optional[str]:
+        return self.doctor.name if self.doctor else None

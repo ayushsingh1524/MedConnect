@@ -80,7 +80,7 @@ button:disabled {
   opacity: 0.6;
 }
 
-input, select, textarea {
+input:not([type="radio"]):not([type="checkbox"]), select, textarea {
   font-family: inherit;
   width: 100%;
   padding: 0.5rem 0.75rem;
@@ -90,7 +90,7 @@ input, select, textarea {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-input:focus, select:focus, textarea:focus {
+input:not([type="radio"]):not([type="checkbox"]):focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary-500);
   box-shadow: 0 0 0 3px var(--primary-100);
@@ -108,8 +108,6 @@ input:focus, select:focus, textarea:focus {
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: var(--sidebar-width);
-  transition: margin-left 0.3s ease;
 }
 
 .page-container {
@@ -184,9 +182,6 @@ input:focus, select:focus, textarea:focus {
 
 /* Responsive Utilities */
 @media (max-width: 768px) {
-  .app-container .main-content {
-    margin-left: 0;
-  }
   .page-container {
     padding: 1rem;
   }

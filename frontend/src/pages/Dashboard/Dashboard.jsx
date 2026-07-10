@@ -115,9 +115,9 @@ const Dashboard = () => {
           <h1 className="page-title">Overview</h1>
           <p className="page-subtitle">Welcome back, Sarah. Here's what's happening today.</p>
         </div>
-        <button className="primary-btn">
+        <Link to="/chat" className="primary-btn">
           <span className="icon">+</span> Log Interaction
-        </button>
+        </Link>
       </div>
 
       <div className="analytics-grid">
@@ -180,27 +180,29 @@ const Dashboard = () => {
           <div className="section-header">
             <h2>Action Items</h2>
           </div>
-          <div className="tasks-list">
-            {loading ? (
-              <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-                <div className="skeleton" style={{height: '100px', width: '100%'}}></div>
-                <div className="skeleton" style={{height: '100px', width: '100%'}}></div>
-              </div>
-            ) : tasks.length > 0 ? (
-              tasks.map(task => (
-                <FollowUpCard 
-                  key={task.id} 
-                  followUp={task} 
-                  onComplete={() => confirmCompleteTask(task.id)} 
-                />
-              ))
-            ) : (
-              <div className="empty-state">
-                <span className="empty-icon">✅</span>
-                <h3>All caught up!</h3>
-                <p>You have no pending follow-ups.</p>
-              </div>
-            )}
+          <div className="tasks-wrapper">
+            <div className="tasks-list">
+              {loading ? (
+                <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+                  <div className="skeleton" style={{height: '100px', width: '100%'}}></div>
+                  <div className="skeleton" style={{height: '100px', width: '100%'}}></div>
+                </div>
+              ) : tasks.length > 0 ? (
+                tasks.map(task => (
+                  <FollowUpCard 
+                    key={task.id} 
+                    followUp={task} 
+                    onComplete={() => confirmCompleteTask(task.id)} 
+                  />
+                ))
+              ) : (
+                <div className="empty-state">
+                  <span className="empty-icon">✅</span>
+                  <h3>All caught up!</h3>
+                  <p>You have no pending follow-ups.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
